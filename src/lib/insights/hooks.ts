@@ -11,6 +11,7 @@ import {
   resolveAttemptWise,
   resolveConversations,
   resolveGrouped,
+  resolveHeatmap,
   resolveInboundAgentTable,
   resolveInboundSeries,
   resolveInboundSummary,
@@ -21,10 +22,13 @@ import {
   resolvePickupByTime,
   resolveScalar,
   resolveSeries,
+  resolveVariantSeries,
+  resolveVariantStats,
   type AgentRow,
   type AttemptWiseRow,
   type ConversationPoint,
   type GroupPoint,
+  type HeatmapData,
   type InboundAgentRow,
   type InboundSeriesPoint,
   type InboundSummary,
@@ -33,6 +37,8 @@ import {
   type NumberWiseRow,
   type OutboundSummary,
   type SeriesPoint,
+  type VariantSeriesPoint,
+  type VariantStats,
 } from "./resolver"
 import type { DataResult, Metric, TimeRange } from "./types"
 
@@ -85,6 +91,19 @@ export function useMetricSeries(
     () => (metric ? resolveMetricSeries(metric, range) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [metric, range, refreshKey]
+  )
+  return { data, loading }
+}
+
+export function useHeatmap(
+  range: TimeRange,
+  refreshKey = 0
+): DataResult<HeatmapData> {
+  const loading = useLoadingFor(`heatmap|${range}|${refreshKey}`)
+  const data = React.useMemo(
+    () => resolveHeatmap(range),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [range, refreshKey]
   )
   return { data, loading }
 }
@@ -226,6 +245,36 @@ export function usePickupByTime(
     () => resolvePickupByTime(range),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [range, refreshKey]
+  )
+  return { data, loading }
+}
+
+export function useVariantStats(
+  agent: string,
+  range: TimeRange,
+  refreshKey = 0
+): DataResult<VariantStats> {
+  const loading = useLoadingFor(`variant|${agent}|${range}|${refreshKey}`)
+  const data = React.useMemo(
+    () => resolveVariantStats(agent, range),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [agent, range, refreshKey]
+  )
+  return { data, loading }
+}
+
+export function useVariantSeries(
+  agents: string[],
+  range: TimeRange,
+  refreshKey = 0
+): DataResult<VariantSeriesPoint[]> {
+  const loading = useLoadingFor(
+    `variantseries|${agents.join(",")}|${range}|${refreshKey}`
+  )
+  const data = React.useMemo(
+    () => resolveVariantSeries(agents, range),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [agents.join(","), range, refreshKey]
   )
   return { data, loading }
 }
